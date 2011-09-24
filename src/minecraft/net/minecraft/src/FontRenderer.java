@@ -16,10 +16,10 @@ import com.pclewis.mcpatcher.mod.TextureUtils;
 
 public class FontRenderer {
 
-	private int[] charWidth = new int[256];
+	public int[] charWidth = new int[256];
 	public int fontTextureName = 0;
-	private int fontDisplayLists;
-	private IntBuffer buffer = GLAllocation.createDirectIntBuffer(1024 /*GL_FRONT_LEFT*/);
+	public int fontDisplayLists;
+	public IntBuffer buffer = GLAllocation.createDirectIntBuffer(1024 /*GL_FRONT_LEFT*/);
 
 
 	public FontRenderer(GameSettings var1, String var2, RenderEngine var3) {
@@ -135,7 +135,10 @@ public class FontRenderer {
 			GL11.glColor3f((float)var11 / 255.0F, (float)var12 / 255.0F, (float)var22 / 255.0F);
 			GL11.glEndList();
 		}
-
+		//cnmode start
+        if (TransTool.isTrans())
+            TransTool.getTransMod().register(var3);
+	//cnmode end
 	}
 	
 	public void drawStringWithShadow(String var1, int var2, int var3, int var4) {
@@ -211,6 +214,10 @@ public class FontRenderer {
 	//Spout End
 	
 	public void renderString(String var1, int var2, int var3, int var4, boolean var5) {
+		//cnmode
+		if ((TransTool.isTrans()) && 
+        	      (TransTool.getTransMod().renderString(this, var1, var2, var3, var4, var5))) return;
+		//cnmode
 		if(var1 != null) {
 			int var6;
 			if(var5) {
@@ -270,6 +277,14 @@ public class FontRenderer {
 	}
 
 	public int getStringWidth(String var1) {
+		///cnmode
+		if (TransTool.isTrans()) {
+			int width = TransTool.getTransMod().getStringWidth(this, var1);
+			if (width >= 0) {
+				return width;
+			}
+		}
+		///cnmode
 		if(var1 == null) {
 			return 0;
 		} else {

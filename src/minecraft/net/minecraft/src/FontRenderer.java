@@ -18,7 +18,7 @@ import com.pclewis.mcpatcher.mod.TextureUtils;
 
 public class FontRenderer {
 
-	private int[] charWidth = new int[256];
+	public int[] charWidth = new int[256]; //cnmode
 	public int fontTextureName = 0;
 	public int FONT_HEIGHT = 8;
 	public Random field_41064_c = new Random();

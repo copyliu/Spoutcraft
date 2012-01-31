@@ -29,7 +29,8 @@ import org.spoutcraft.spoutcraftapi.event.screen.SliderDragEvent;
 import org.spoutcraft.spoutcraftapi.event.screen.TextFieldChangeEvent;
 import org.spoutcraft.spoutcraftapi.gui.*;
 import org.spoutcraft.spoutcraftapi.gui.GenericComboBox.ComboBoxView;
-
+import java.io.UnsupportedEncodingException;//cnmode
+import java.nio.charset.Charset;//cnmode
 //Spout End
 
 public class GuiScreen extends Gui {
@@ -53,7 +54,13 @@ public class GuiScreen extends Gui {
 	long renderEndNanoTime = 0L;
 	protected static int limitedFramerate = 120;
 	private long lastClick = 0;
-
+	protected boolean cnMode;//cnmode
+	public static String code = getCode();//cnmode
+	//cnmode start
+	public static String getCode() {
+		return Charset.defaultCharset().toString().toLowerCase();
+	}
+	//cnmode end
 	public Player getPlayer() {
 		if (this.mc.thePlayer != null) {
 			return (Player) this.mc.thePlayer.spoutEntity;
@@ -428,6 +435,7 @@ public class GuiScreen extends Gui {
 			this.handleMouseInput();
 		}
 		// Spout Start
+		cnMode = false;//cnmode
 		while (Keyboard.next()) {
 			if (mc.thePlayer instanceof EntityClientPlayerMP && SpoutClient.getInstance().isSpoutEnabled()) {
 				EntityClientPlayerMP player = (EntityClientPlayerMP) mc.thePlayer;
@@ -603,14 +611,63 @@ public class GuiScreen extends Gui {
 			// Spout - Start of vanilla code, got wrapped with this if
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == 87) {
-					this.mc.toggleFullscreen();
+					mc.toggleFullscreen();
 					return;
 				}
+			// cnmode start
+			char c = Keyboard.getEventCharacter();
+			char c1;
+			if (c > 0x80 ) {
+				//進入中文模式
+				//先處理第一個字符
+				Keyboard.next();
+				c1 = Keyboard.getEventCharacter();
+				try {
+					c = (new String(new byte[] {
+						(byte)c, (byte)c1
+						}, code)).toCharArray()[0];
+					keyTyped(c, Keyboard.getEventKey());
+				}
+				catch (UnsupportedEncodingException unsupportedencodingexception) {
+					unsupportedencodingexception.printStackTrace();
+				}
+				
+				//開始處理混輸
+				while (Keyboard.next())
+				{
+					System.out.println("FUCK!");
+					c = Keyboard.getEventCharacter();
+					if (c > 0x80 ) {
+					//如果是中文
+					Keyboard.next();
+					c1 = Keyboard.getEventCharacter();
+					try {
+						c = (new String(new byte[] {
+							(byte)c, (byte)c1
+							}, code)).toCharArray()[0];
+						keyTyped(c, Keyboard.getEventKey());
+					}
+					catch (UnsupportedEncodingException unsupportedencodingexception) {
+						unsupportedencodingexception.printStackTrace();
+					}
+				}
+					else{
+						
+						keyTyped(c, Keyboard.getEventKey());
+					}
+					
+				}
+				
+			}
+			else  {
+				
 				this.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey());
+			// cnmode end
 			}
 			// Spout - End of vanilla code
-		}
+			}
 		// Spout End
+		}
 	}
 
 	public void updateScreen() {
